@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.MultipartConfigElement;
@@ -16,7 +17,10 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
+import com.csra.config.HibernateConnector;
 import com.csra.models.Hero;
 
 import spark.Request;
@@ -26,7 +30,7 @@ public class HeroDao {
 	private static ObjectMapper mapperObj = new ObjectMapper();
 	
 	private static ArrayList<Hero> heroes = init();
-	
+	private static HeroDao heroDao = new HeroDao();
 	
 	public static ArrayList<Hero> init()
 	{
@@ -56,6 +60,7 @@ public class HeroDao {
 		
 			Hero newHero = jsonToHero(req);
 			newHero.setId(heroes.size() + 1);
+			heroDao.addHero(newHero);
 			heroes.add(newHero);
 			return toJson(newHero);
 		
@@ -163,11 +168,29 @@ public class HeroDao {
 			if(hero.getName().toLowerCase().contains(searchTerm.toLowerCase()) && !matchedHeroes.contains(hero))
 				containsHeroes.add(hero);
 		}
-
+		Collections.sort(matchedHeroes);
 		matchedHeroes.addAll(containsHeroes);
 		return toJson(matchedHeroes.toArray());
 		
 		
+	}
+	
+	public Hero addHero(Hero hero)
+	{
+		Session session = null;
+		Transaction tran = null;
+		try{
+		session = HibernateConnector.getInstance().getSession();
+		tran = session.beginTransaction();
+		session.save(hero);
+		tran.commit();
+		return hero;
+		} catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			session.close();
+		}
 	}
 	
 }
