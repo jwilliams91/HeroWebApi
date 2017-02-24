@@ -36,7 +36,6 @@ public class HeroDao extends AbstractDao{
 	public String create(Request req) {
 		
 			Hero newHero = jsonToType(req, Hero.class);
-			newHero.setId(heroes.size() + 1);
 			return typeToJson(create(newHero, Hero.class));
 		
 	}
