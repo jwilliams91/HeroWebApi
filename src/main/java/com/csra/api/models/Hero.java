@@ -1,4 +1,4 @@
-package com.csra.models;
+package com.csra.api.models;
 
 import java.io.Serializable;
 
@@ -10,6 +10,9 @@ import javax.persistence.Table;
 @Entity
 @Table(name="Heroes")
 public class Hero implements Comparable<Hero>, Serializable{
+
+	
+	private static final long serialVersionUID = 1392901927933144795L;
 
 	@Id
 	private int id;

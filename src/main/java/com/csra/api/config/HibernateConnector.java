@@ -1,4 +1,4 @@
-package com.csra.config;
+package com.csra.api.config;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;

@@ -1,4 +1,4 @@
-package com.csra.daos;
+package com.csra.api.daos;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,26 +17,25 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import com.csra.config.HibernateConnector;
-import com.csra.models.Hero;
+import com.csra.api.config.HibernateConnector;
+import com.csra.api.models.Hero;
 
 import spark.Request;
 
-public class HeroDao {
+public class HeroDao extends AbstractDao{
 
-	private static ObjectMapper mapperObj = new ObjectMapper();
 	private static List<Hero> heroes = new ArrayList<Hero>();
 	
-	public String getHeroById(String id)
+	public String getById(String id)
 	{
 		Session session = null;
         try {
             session = HibernateConnector.getInstance().getSession();
-            Query query = session.createQuery("from Hero h where h.id = :id");
+            Query<Hero> query = session.createQuery("from Hero h where h.id = :id", Hero.class);
             query.setParameter("id", Integer.parseInt(id));
  
             List<Hero> queryList = query.list();
@@ -44,7 +43,7 @@ public class HeroDao {
                 return null;
             } else {
             	Hero result = queryList.get(0);
-                return toJson(result);
+                return typeToJson(result);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -54,20 +53,20 @@ public class HeroDao {
         }
 	}
 	
-	public String getHeroes()
+	public String getList()
 	{
 		
 		Session session = null;
         try {
             session = HibernateConnector.getInstance().getSession();
-            Query query = session.createQuery("from Hero h");
+            Query<Hero> query = session.createQuery("from Hero h", Hero.class);
  
             List<Hero> queryList = query.list();
             if (queryList != null && queryList.isEmpty()) {
                 return null;
             } else {
             	HeroDao.heroes = queryList;
-                return toJson(queryList.toArray());
+                return typeToJson(queryList.toArray());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,25 +79,25 @@ public class HeroDao {
 		
 	}
 
-	public String createHero(Request req) {
+	public String create(Request req) {
 		
-			Hero newHero = jsonToHero(req);
+			Hero newHero = jsonToType(req, Hero.class);
 			newHero.setId(heroes.size() + 1);
 			this.addHero(newHero);
 			heroes.add(newHero);
-			return toJson(newHero);
+			return typeToJson(newHero);
 		
 	}
 
-	public Hero updateHero(Request req) {
+	public String update(Request req) {
 		
-			Hero updatedHero = jsonToHero(req);
+			Hero updatedHero = jsonToType(req, Hero.class);
 			Session session = null;
 	        try {
 	            session = HibernateConnector.getInstance().getSession();
 	            session.saveOrUpdate(updatedHero);
 	            session.flush();
-	            return updatedHero;
+	            return "200";
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	            return null;
@@ -108,7 +107,7 @@ public class HeroDao {
 		
 	}
 
-	public String deleteHero(String id) {
+	public String delete(String id) {
 		Session session = null;
 		Transaction tran = null;
         try {
@@ -126,38 +125,6 @@ public class HeroDao {
             session.close();
         }
 	}
-
-	private static Hero jsonToHero(Request req)
-	{
-		try {
-			Hero hero = mapperObj.readValue(req.body(), Hero.class);
-			return hero;
-		} catch (JsonParseException e) {
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-		
-	}
-	
-	
-	public static String toJson(Object o)
-	{
-		try {
-			return mapperObj.writeValueAsString(o);
-		} catch (JsonGenerationException e) {
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
 
 	public Object uploadImage(Request req) {
 		
@@ -192,7 +159,7 @@ public class HeroDao {
 		}
 		Collections.sort(matchedHeroes);
 		matchedHeroes.addAll(containsHeroes);
-		return toJson(matchedHeroes.toArray());
+		return typeToJson(matchedHeroes.toArray());
 		
 		
 	}
