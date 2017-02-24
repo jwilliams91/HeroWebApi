@@ -5,6 +5,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
+import com.csra.api.models.*;
+
 public class HibernateConnector {
 
 	private static HibernateConnector me;
@@ -18,8 +20,10 @@ public class HibernateConnector {
         cfg.setProperty("hibernate.connection.url", "jdbc:mysql://localhost:3306/HeroDB");
         cfg.setProperty("hibernate.connection.username", "HeroAdmin");
         cfg.setProperty("hibernate.connection.password", "heroMadness");
+        //cfg.setProperty("hibernate.show_sql", "true");
+        cfg.addAnnotatedClass(Hero.class);
+        cfg.addAnnotatedClass(Sidekick.class);
  
-        cfg.addResource("com/csra/pojo/Hero.hbm.xml");
         
         sessionFactory = cfg.buildSessionFactory();
 	}
