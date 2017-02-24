@@ -3,8 +3,6 @@ package com.csra.api.models;
 import java.io.Serializable;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Table(name="Heroes")
@@ -24,20 +22,12 @@ public class Hero extends AbstractModel implements Comparable<Hero>, Serializabl
 	
 	public Hero(int id, String name, String secretIdentity, String bio)
 	{
-		this.id = id;
+		super.setId(id);
 		this.name = name;
 		this.secretIdentity = secretIdentity;
 		this.bio = bio;
 	}
 	
-	
-	@Column(name="id", unique = true, nullable = false)
-	public int getId() {
-		return id;
-	}
-	public void setId(int id) {
-		this.id = id;
-	}
 	
 	@Column(name="name", length = 255)
 	public String getName() {
