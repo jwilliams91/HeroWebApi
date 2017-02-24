@@ -7,15 +7,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Entity
 @Table(name="Heroes")
-public class Hero implements Comparable<Hero>, Serializable{
+public class Hero extends AbstractModel implements Comparable<Hero>, Serializable{
 
 	
 	private static final long serialVersionUID = 1392901927933144795L;
-
-	@Id
-	private int id;
 	
 	private String name;
 	private String secretIdentity;

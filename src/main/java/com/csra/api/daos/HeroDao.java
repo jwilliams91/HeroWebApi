@@ -83,9 +83,20 @@ public class HeroDao extends AbstractDao{
 		
 			Hero newHero = jsonToType(req, Hero.class);
 			newHero.setId(heroes.size() + 1);
-			this.addHero(newHero);
-			heroes.add(newHero);
+			Session session = null;
+			Transaction tran = null;
+			try{
+			session = HibernateConnector.getInstance().getSession();
+			tran = session.beginTransaction();
+			session.save(newHero);
+			tran.commit();
 			return typeToJson(newHero);
+			} catch(Exception e) {
+				e.printStackTrace();
+				return null;
+			} finally {
+				session.close();
+			}
 		
 	}
 
@@ -164,23 +175,6 @@ public class HeroDao extends AbstractDao{
 		
 	}
 	
-	public Hero addHero(Hero hero)
-	{
-		Session session = null;
-		Transaction tran = null;
-		try{
-		session = HibernateConnector.getInstance().getSession();
-		tran = session.beginTransaction();
-		session.save(hero);
-		tran.commit();
-		return hero;
-		} catch(Exception e) {
-			e.printStackTrace();
-			return null;
-		} finally {
-			session.close();
-		}
-	}
 	
 	
 }
