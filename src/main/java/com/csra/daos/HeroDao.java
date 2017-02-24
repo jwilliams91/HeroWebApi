@@ -17,6 +17,7 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -28,73 +29,102 @@ import spark.Request;
 public class HeroDao {
 
 	private static ObjectMapper mapperObj = new ObjectMapper();
+	private static List<Hero> heroes = new ArrayList<Hero>();
 	
-	private static ArrayList<Hero> heroes = init();
-	private static HeroDao heroDao = new HeroDao();
-	
-	public static ArrayList<Hero> init()
+	public String getHeroById(String id)
 	{
-		ArrayList<Hero> list = new ArrayList<Hero>(10);
-		list.add(new Hero(1, "Iron Man","Tony Stark","An American billionaire playboy, business magnate, and ingenious engineer."));
-		list.add(new Hero(2, "Thor","Thor, Son of Odin", "Thor is a hammer-wielding god associated with thunder, lightning, storms, oak trees, strength, and the protection of mankind."));
-		list.add(new Hero(3, "Captain America", "Steve Rodgers", "Captain America wears a costume that bears an American flag motif, and is armed with a nearly indestructible shield that he throws at foes."));
-		list.add(new Hero(4, "Hulk", "Bruce Banner", "Following his accidental exposure to gamma radiation during the detonation of an experimental bomb, Banner is physically transformed into the Hulk when subjected to emotional stress, at or against his will."));
-		return list;
+		Session session = null;
+        try {
+            session = HibernateConnector.getInstance().getSession();
+            Query query = session.createQuery("from Hero h where h.id = :id");
+            query.setParameter("id", Integer.parseInt(id));
+ 
+            List<Hero> queryList = query.list();
+            if (queryList != null && queryList.isEmpty()) {
+                return null;
+            } else {
+            	Hero result = queryList.get(0);
+                return toJson(result);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            session.close();
+        }
 	}
 	
-	public static String getHeroById(String passedId)
+	public String getHeroes()
 	{
-		for(Hero hero: heroes)
-			if(hero.getId() == Integer.parseInt(passedId))
-				return toJson(hero);
 		
-		return null;
-	}
-	
-	public static String getHeroes()
-	{
-		return toJson(heroes);
+		Session session = null;
+        try {
+            session = HibernateConnector.getInstance().getSession();
+            Query query = session.createQuery("from Hero h");
+ 
+            List<Hero> queryList = query.list();
+            if (queryList != null && queryList.isEmpty()) {
+                return null;
+            } else {
+            	HeroDao.heroes = queryList;
+                return toJson(queryList.toArray());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            session.close();
+        }
+		
+		
+		
 	}
 
-	public static String createHero(Request req) {
+	public String createHero(Request req) {
 		
 			Hero newHero = jsonToHero(req);
 			newHero.setId(heroes.size() + 1);
-			heroDao.addHero(newHero);
+			this.addHero(newHero);
 			heroes.add(newHero);
 			return toJson(newHero);
 		
 	}
 
-	public static Hero updateHero(Request req) {
+	public Hero updateHero(Request req) {
 		
 			Hero updatedHero = jsonToHero(req);
-			for(int i =0; i < heroes.size(); i++)
-				if(heroes.get(i).getId() == updatedHero.getId())
-				{
-					heroes.set(i, updatedHero);
-					return updatedHero;
-				}	
-			return null;
+			Session session = null;
+	        try {
+	            session = HibernateConnector.getInstance().getSession();
+	            session.saveOrUpdate(updatedHero);
+	            session.flush();
+	            return updatedHero;
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            return null;
+	        } finally {
+	            session.close();
+	        }
 		
 	}
 
-	public static Object deleteHero(String passedId) {
-		int indexOfRemoved = 0;
-		for(int i=0; i < heroes.size(); i++) //Remove Hero from List
-			if(heroes.get(i).getId() == Integer.parseInt(passedId))
-			{
-				indexOfRemoved = i;
-				heroes.remove(i);
-			}
-		
-		for(int j=heroes.size() - 1; j >= indexOfRemoved; j--) //Updates the Hero Object ID's to remain sequential
-		{
-			Hero current = heroes.get(j);
-			current.setId(current.getId() - 1);
-		}
-			
-		return "200";
+	public String deleteHero(String id) {
+		Session session = null;
+		Transaction tran = null;
+        try {
+            session = HibernateConnector.getInstance().getSession();
+            tran = session.beginTransaction();
+            Query query = session.createQuery("delete from Hero h where h.id =:id");
+            query.setParameter("id", Integer.parseInt(id));
+            query.executeUpdate();
+            tran.commit();
+            return "";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        } finally {
+            session.close();
+        }
 	}
 
 	private static Hero jsonToHero(Request req)
@@ -128,17 +158,8 @@ public class HeroDao {
 		return null;
 	}
 
-	public static String printHeroes()
-	{
-		String result = "";
-		for(Hero hero: heroes)
-		{
-			result += "(" + hero.getId() + ", " + hero.getName() +")\n";
-		}
-		return result;
-	}
 
-	public static Object uploadImage(Request req) {
+	public Object uploadImage(Request req) {
 		
 		try {
 			MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/tmp");
@@ -155,9 +176,10 @@ public class HeroDao {
 		return "";
 	}
 
-	public static String matchedHeroes(Request req) {
+	public String matchedHeroes(Request req) {
 		List<Hero> matchedHeroes = new ArrayList<Hero>();
 		List<Hero> containsHeroes = new ArrayList<Hero>();
+		
 		
 		String searchTerm = req.queryParams("name");
 		
@@ -192,5 +214,6 @@ public class HeroDao {
 			session.close();
 		}
 	}
+	
 	
 }

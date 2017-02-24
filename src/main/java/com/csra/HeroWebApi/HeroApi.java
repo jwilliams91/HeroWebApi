@@ -15,14 +15,15 @@ public class HeroApi
 	
     public static void main( String[] args )
     {
+    	HeroDao heroDao = new HeroDao();
     	enableCORS("http://localhost:4200", "*", "*");
-        get("/api/heroes/:id", (req, res) -> HeroDao.getHeroById(req.params("id")));
-        get("/api/heroes", (req, res) -> HeroDao.getHeroes());
-        get("/api/heroes/search/", (req, res) -> HeroDao.matchedHeroes(req));
-        put("/api/heroes/:id", (req, res) -> HeroDao.updateHero(req));
-        post("/api/heroes", (req, res) -> HeroDao.createHero(req));
-        post("/api/heroes/upload", (req, res) -> HeroDao.uploadImage(req));
-        delete("/api/heroes/:id", "application/json", (req,res) -> HeroDao.deleteHero(req.params("id")));
+        get("/api/heroes/:id", (req, res) -> heroDao.getHeroById(req.params("id")));
+        get("/api/heroes", (req, res) -> heroDao.getHeroes());
+        get("/api/heroes/search/", (req, res) -> heroDao.matchedHeroes(req));
+        put("/api/heroes/:id", (req, res) -> heroDao.updateHero(req));
+        post("/api/heroes", (req, res) -> heroDao.createHero(req));
+        post("/api/heroes/upload", (req, res) -> heroDao.uploadImage(req));
+        delete("/api/heroes/:id", "application/json", (req,res) -> heroDao.deleteHero(req.params("id")));
         
     }
     
