@@ -13,15 +13,6 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletException;
 import javax.servlet.http.Part;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.hibernate.query.Query;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-
-import com.csra.api.config.HibernateConnector;
 import com.csra.api.models.Hero;
 
 import spark.Request;
@@ -30,111 +21,35 @@ public class HeroDao extends AbstractDao{
 
 	private static List<Hero> heroes = new ArrayList<Hero>();
 	
-	public String getById(String id)
-	{
-		Session session = null;
-        try {
-            session = HibernateConnector.getInstance().getSession();
-            Query<Hero> query = session.createQuery("from Hero h where h.id = :id", Hero.class);
-            query.setParameter("id", Integer.parseInt(id));
- 
-            List<Hero> queryList = query.list();
-            if (queryList != null && queryList.isEmpty()) {
-                return null;
-            } else {
-            	Hero result = queryList.get(0);
-                return typeToJson(result);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            session.close();
-        }
-	}
-	
 	public String getList()
 	{
-		
-		Session session = null;
-        try {
-            session = HibernateConnector.getInstance().getSession();
-            Query<Hero> query = session.createQuery("from Hero h", Hero.class);
- 
-            List<Hero> queryList = query.list();
-            if (queryList != null && queryList.isEmpty()) {
-                return null;
-            } else {
-            	HeroDao.heroes = queryList;
-                return typeToJson(queryList.toArray());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        } finally {
-            session.close();
-        }
-		
-		
+		heroes = getList(Hero.class);
+		return typeToJson(heroes.toArray());
 		
 	}
 
+	public String getById(String id)
+	{
+		return typeToJson(getById(id, Hero.class));
+	}
+	
 	public String create(Request req) {
 		
 			Hero newHero = jsonToType(req, Hero.class);
 			newHero.setId(heroes.size() + 1);
-			Session session = null;
-			Transaction tran = null;
-			try{
-			session = HibernateConnector.getInstance().getSession();
-			tran = session.beginTransaction();
-			session.save(newHero);
-			tran.commit();
-			return typeToJson(newHero);
-			} catch(Exception e) {
-				e.printStackTrace();
-				return null;
-			} finally {
-				session.close();
-			}
+			return typeToJson(create(newHero, Hero.class));
 		
 	}
 
 	public String update(Request req) {
-		
+			
 			Hero updatedHero = jsonToType(req, Hero.class);
-			Session session = null;
-	        try {
-	            session = HibernateConnector.getInstance().getSession();
-	            session.saveOrUpdate(updatedHero);
-	            session.flush();
-	            return "200";
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	            return null;
-	        } finally {
-	            session.close();
-	        }
+			return update(updatedHero);
 		
 	}
 
 	public String delete(String id) {
-		Session session = null;
-		Transaction tran = null;
-        try {
-            session = HibernateConnector.getInstance().getSession();
-            tran = session.beginTransaction();
-            Query query = session.createQuery("delete from Hero h where h.id =:id");
-            query.setParameter("id", Integer.parseInt(id));
-            query.executeUpdate();
-            tran.commit();
-            return "";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
-        } finally {
-            session.close();
-        }
+		return delete(id,Hero.class);
 	}
 
 	public Object uploadImage(Request req) {
