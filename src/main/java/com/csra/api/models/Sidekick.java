@@ -20,8 +20,8 @@ public class Sidekick implements Comparable<Sidekick>{
 	private String name;
 	private String secretIdentity;
 	private String bio;
-	private Hero hero;
 	private int age;
+	private Hero hero;
 	
 	public Sidekick()
 	{

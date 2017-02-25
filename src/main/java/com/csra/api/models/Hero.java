@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -70,7 +71,7 @@ public class Hero implements Comparable<Hero>{
 		this.bio = bio;
 	}
 
-	@OneToMany(mappedBy = "hero", cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "hero", cascade = CascadeType.ALL)
 	public Set<Sidekick> getSidekicks() {
 		return sidekicks;
 	}
