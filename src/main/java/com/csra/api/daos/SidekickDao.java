@@ -13,6 +13,7 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletException;
 import javax.servlet.http.Part;
 
+import com.csra.api.models.Hero;
 import com.csra.api.models.Sidekick;
 
 import spark.Request;
@@ -35,8 +36,15 @@ public class SidekickDao extends AbstractDao {
 	@Override
 	public String create(Request req) {
 		
-		Sidekick newSidekick = jsonToType(req, Sidekick.class);
-		return typeToJson(create(newSidekick, Sidekick.class));
+		Sidekick[] newSidekick = jsonToType(req, Sidekick[].class);
+		for(Sidekick s : newSidekick)
+		{
+			HeroDao heroDao = new HeroDao();
+			List<Hero> heroes = heroDao.getList(Hero.class);
+			s.setHero(heroes.get(heroes.size() - 1 ));
+			create(s, Sidekick.class);
+		}
+		return "200";
 	}
 
 	@Override

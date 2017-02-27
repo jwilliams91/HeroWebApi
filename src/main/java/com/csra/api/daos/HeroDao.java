@@ -14,6 +14,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Part;
 
 import com.csra.api.models.Hero;
+import com.csra.api.models.Sidekick;
 
 import spark.Request;
 
@@ -24,6 +25,10 @@ public class HeroDao extends AbstractDao{
 	public String getList()
 	{
 		heroes = getList(Hero.class);
+		for(Hero h: heroes)
+		{
+			h.setSidekicks(null);
+		}
 		return typeToJson(heroes.toArray());
 		
 	}
@@ -35,8 +40,9 @@ public class HeroDao extends AbstractDao{
 	
 	public String create(Request req) {
 		
-			Hero newHero = jsonToType(req, Hero.class);
-			return typeToJson(create(newHero, Hero.class));
+			
+			Hero newHero = create(jsonToType(req, Hero.class), Hero.class);
+			return typeToJson(newHero);
 		
 	}
 
@@ -88,7 +94,6 @@ public class HeroDao extends AbstractDao{
 		
 		
 	}
-	
-	
+
 	
 }

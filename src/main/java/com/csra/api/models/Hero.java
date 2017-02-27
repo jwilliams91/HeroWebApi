@@ -71,7 +71,7 @@ public class Hero implements Comparable<Hero>{
 		this.bio = bio;
 	}
 
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "hero", cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "hero")
 	public Set<Sidekick> getSidekicks() {
 		return sidekicks;
 	}
