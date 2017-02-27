@@ -19,7 +19,7 @@ public class HeroApi
     	
     	//Hero Listeners
     	HeroDao heroDao = new HeroDao();
-    	
+    	//heroDao.createCRUD();
         get("/api/heroes/:id", (req, res) -> heroDao.getById(req.params("id")));
         get("/api/heroes", (req, res) -> heroDao.getList());
         get("/api/heroes/search/", (req, res) -> heroDao.matchedHeroes(req));
