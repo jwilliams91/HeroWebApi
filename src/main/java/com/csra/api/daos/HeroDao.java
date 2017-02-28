@@ -45,9 +45,11 @@ public class HeroDao extends AbstractDao{
 			String[] payload = req.body().split("//");
 			Hero newHero = jsonToType(payload[0], Hero.class);
 			Sidekick[] sidekicks = jsonToType(payload[1], Sidekick[].class);
-			for(Sidekick s : sidekicks)
-				s.setHero(newHero);
-			newHero.setSidekicks(new HashSet<Sidekick>(Arrays.asList(sidekicks)));
+			if(sidekicks != null){
+				for(Sidekick s : sidekicks)
+					s.setHero(newHero);
+				newHero.setSidekicks(new HashSet<Sidekick>(Arrays.asList(sidekicks)));
+			}
 			create(newHero, Hero.class);
 			
 			return "200";
