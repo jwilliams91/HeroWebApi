@@ -12,6 +12,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+
+
 @Entity
 @Table(name="Heroes")
 public class Hero implements Comparable<Hero>{
@@ -71,7 +73,7 @@ public class Hero implements Comparable<Hero>{
 		this.bio = bio;
 	}
 
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "hero")
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "hero", cascade = CascadeType.ALL, orphanRemoval = true)
 	public Set<Sidekick> getSidekicks() {
 		return sidekicks;
 	}

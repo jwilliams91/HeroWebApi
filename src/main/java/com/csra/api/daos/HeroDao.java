@@ -6,7 +6,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.servlet.MultipartConfigElement;
@@ -40,15 +42,21 @@ public class HeroDao extends AbstractDao{
 	
 	public String create(Request req) {
 		
+			String[] payload = req.body().split("//");
+			Hero newHero = jsonToType(payload[0], Hero.class);
+			Sidekick[] sidekicks = jsonToType(payload[1], Sidekick[].class);
+			for(Sidekick s : sidekicks)
+				s.setHero(newHero);
+			newHero.setSidekicks(new HashSet<Sidekick>(Arrays.asList(sidekicks)));
+			create(newHero, Hero.class);
 			
-			Hero newHero = create(jsonToType(req, Hero.class), Hero.class);
-			return typeToJson(newHero);
+			return "200";
 		
 	}
 
 	public String update(Request req) {
 			
-			Hero updatedHero = jsonToType(req, Hero.class);
+			Hero updatedHero = jsonToType(req.body(), Hero.class);
 			return update(updatedHero);
 		
 	}

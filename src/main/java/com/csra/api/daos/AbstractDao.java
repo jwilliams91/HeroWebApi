@@ -114,12 +114,9 @@ public abstract class AbstractDao {
         try {
             session = HibernateConnector.getInstance().getSession();
             tran = session.beginTransaction();
-            String[] queryTxt = type.getName().split("\\.");
-            String className = queryTxt[queryTxt.length - 1];
-            char firstChar = className.toLowerCase().charAt(0);
-            Query query = session.createQuery("delete from "+ className + " " + firstChar + " where " + firstChar +".id = :id");
-            query.setParameter("id", Integer.parseInt(id));
-            query.executeUpdate();
+            Object persistentObj = session.load(type, Integer.parseInt(id));
+            if(persistentObj !=null)
+            	session.delete(persistentObj);
             tran.commit();
             return "";
         } catch (Exception e) {
@@ -129,10 +126,10 @@ public abstract class AbstractDao {
             session.close();
         }
 	}
-	protected static <T> T jsonToType(Request req, Class<T> type)
+	protected static <T> T jsonToType(String req, Class<T> type)
 	{
 		try {
-			return mapperObj.readValue(req.body(), type);
+			return mapperObj.readValue(req, type);
 		} catch (JsonParseException e) {
 			e.printStackTrace();
 		} catch (JsonMappingException e) {

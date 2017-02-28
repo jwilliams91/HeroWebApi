@@ -36,7 +36,7 @@ public class SidekickDao extends AbstractDao {
 	@Override
 	public String create(Request req) {
 		
-		Sidekick[] newSidekick = jsonToType(req, Sidekick[].class);
+		Sidekick[] newSidekick = jsonToType(req.body(), Sidekick[].class);
 		for(Sidekick s : newSidekick)
 		{
 			HeroDao heroDao = new HeroDao();
@@ -50,7 +50,7 @@ public class SidekickDao extends AbstractDao {
 	@Override
 	public String update(Request req) {
 		
-		Sidekick updatedSidekick = jsonToType(req, Sidekick.class);
+		Sidekick updatedSidekick = jsonToType(req.body(), Sidekick.class);
 		return update(updatedSidekick);
 	}
 
